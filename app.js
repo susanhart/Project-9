@@ -39,7 +39,7 @@ User.init(
 ); 
 
 User.associate = (models) => {
-  User.hasMany(models.Courses, {foreignKey:"id"})
+  User.hasMany(models.Course, {foreignKey:"userId", allowNull:false})
   // TODO Add associations.
 };
 
@@ -51,28 +51,25 @@ Course.init(
       type: Sequelize.INTEGER, 
       primaryKey: true, //properties of the user
     },
-    userId: { //user ID references the User model and uses the id key, this is called a one-to-one relationship
-      references: {
-        model: User,
-        key: 'id',
-      }},
+    
       title: {
          type: Sequelize.STRING, //properties of the course
       },
       description: {
       type: Sequelize.TEXT,
       },
-      estimatedTime: Sequelize.STRING, //key, value
+      estimatedTime: {
+        type: Sequelize.STRING, //key, value
       allowNull: true,
-      defaultValue: null,
-      materialsNeeded: Sequelize.STRING,
+      },
+      materialsNeeded: {
+        type: Sequelize.STRING,
       allowNull: true,
-      defaultValue: null,
-  },
+  }, },
   { sequelize, modelName: "course" }
 ); 
 Course.associate = (models) => {
-  Course.belongsTo(models.User, {foreignKey: "id"}) 
+  Course.belongsTo(models.User, {foreignKey: "userId", allowNull: false}) 
 }
 //Define associations between your models Within your User model, 
 //define a HasMany association between your User and Course models 
@@ -112,6 +109,7 @@ app.get('/api/users', (req, res) => {
 })
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post('/api/users', (req, res) => {
+  res.set('Location', "/");
   res.status(201).json({
     message: '',
   });
