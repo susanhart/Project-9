@@ -32,10 +32,16 @@ User.init(
       type: Sequelize.STRING,
     },
     emailAddress: Sequelize.STRING, //key, value
-    password: Sequelize.STRING
+    password: Sequelize.STRING,
+
   },
   { sequelize, modelName: "user" }
 ); 
+
+User.associate = (models) => {
+  User.hasMany(models.Courses, {foreignKey:"id"})
+  // TODO Add associations.
+};
 
 class Course extends Sequelize.Model {} //created Course class
 Course.init(
@@ -51,16 +57,29 @@ Course.init(
         key: 'id',
       }},
       title: {
-         type: Sequelize.STRING, //properties of the book
+         type: Sequelize.STRING, //properties of the course
       },
       description: {
       type: Sequelize.TEXT,
       },
       estimatedTime: Sequelize.STRING, //key, value
-      materialsNeeded: Sequelize.STRING
+      allowNull: true,
+      defaultValue: null,
+      materialsNeeded: Sequelize.STRING,
+      allowNull: true,
+      defaultValue: null,
   },
   { sequelize, modelName: "course" }
 ); 
+Course.associate = (models) => {
+  Course.belongsTo(models.User, {foreignKey: "id"}) 
+}
+//Define associations between your models Within your User model, 
+//define a HasMany association between your User and Course models 
+//(i.e. a "User" has many "Courses").
+// Within your Course model, define a BelongsTo association 
+//between your Course and User models (i.e. a "Course" belongs to a single "User").
+
 
 sequelize.authenticate().then(function(err) {
   console.log('Connection successful');
@@ -85,6 +104,18 @@ app.use((req, res) => {
   });
 });
 
+//GET /api/users 200 - Returns the currently authenticated user
+app.get('/api/users', (req, res) => {
+  res.status(200).json({
+    message: 'User authenticated',
+  });
+})
+//POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
+app.post('/api/users', (req, res) => {
+  res.status(201).json({
+    message: '',
+  });
+})
 // setup a global error handler
 app.use((err, req, res, next) => {
   if (enableGlobalErrorLogging) {
