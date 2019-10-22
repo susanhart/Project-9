@@ -101,18 +101,16 @@ app.get("/api/users", (req, res) => {
   });
 });
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
-app.post("/api/users", (req, res) => {
-  console.log(req)
-  // User.create({
-  //   firstName: req.data.firstName,
-  //   lastName: req.data.lastName,
-  //   email: req.data.email,
-  //   password: req.data.password
-  // }); 
-  res.set("Location", "/");
-  res.status(201).json({
-    message: ""
-  });
+app.post("/api/users", async (req, res) => {
+  try {
+    await User.create(req.body);
+    res.location('/');
+    res.status(201).end();
+  
+} catch(err){ 
+console.log(err)
+}
+
 });
 
 // send 404 if no other route matched
