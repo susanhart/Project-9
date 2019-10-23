@@ -98,6 +98,7 @@ app.get("/", (req, res) => {
   });
 });
 
+//Create the user routes
 //GET /api/users 200 - Returns the currently authenticated user
 app.get("/api/users", (req, res) => {
   res.status(200).json({
@@ -105,6 +106,7 @@ app.get("/api/users", (req, res) => {
   });
 });
 
+//Create the course routes
 //GET /api/courses 200 - Returns a list of courses (including the user that owns each course)
 
 app.get("/api/courses", async (req, res) => {
@@ -114,7 +116,7 @@ app.get("/api/courses", async (req, res) => {
       }); 
     }); 
     
-
+//Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post("/api/users", async (req, res) => {
   try {
