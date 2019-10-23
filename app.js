@@ -38,6 +38,10 @@ User.init(
   { sequelize, modelName: "user" }
 );
 
+//Define associations between your models Within your User model,
+//define a HasMany association between your User and Course models
+//(i.e. a "User" has many "Courses").
+
 User.associate = models => {
   User.hasMany(models.Course, { foreignKey: "userId", allowNull: false });
   // TODO Add associations.
@@ -69,14 +73,14 @@ Course.init(
   },
   { sequelize, modelName: "course" }
 );
+
+//Define associations between your models 
+// Within your Course model, define a BelongsTo association
+//between your Course and User models (i.e. a "Course" belongs to a single "User").
+
 Course.associate = models => {
   Course.belongsTo(models.User, { foreignKey: "userId", allowNull: false });
 };
-//Define associations between your models Within your User model,
-//define a HasMany association between your User and Course models
-//(i.e. a "User" has many "Courses").
-// Within your Course model, define a BelongsTo association
-//between your Course and User models (i.e. a "Course" belongs to a single "User").
 
 sequelize.authenticate().then(function(err) {
   console.log("Connection successful");
@@ -107,8 +111,7 @@ app.get("/api/courses", async (req, res) => {
     const courses = await Course.findAll();
       res.status(200).json({
         courses
-      }); //end());
-      //res.send(courses)
+      }); 
     }); 
     
 
