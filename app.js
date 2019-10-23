@@ -104,12 +104,11 @@ app.get("/api/users", (req, res) => {
 //GET /api/courses 200 - Returns a list of courses (including the user that owns each course)
 
 app.get("/api/courses", (req, res) => {
-  res.status(200).json({
-  
+      Course.findAll().then(courses =>
+      res.status(200).end());
+      res.send(courses)
+    });
     
-    
-  });
-});
 
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post("/api/users", async (req, res) => {
