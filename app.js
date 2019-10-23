@@ -105,8 +105,11 @@ app.get("/api/users", (req, res) => {
 
 app.get("/api/courses", (req, res) => {
       Course.findAll().then(courses =>
-      res.status(200).end());
-      res.send(courses)
+        console.log(courses),
+      res.status(200).json({
+        courses:courses
+      })); //end());
+      //res.send(courses)
     });
     
 
