@@ -90,7 +90,10 @@ Course.init(
     materialsNeeded: {
       type: Sequelize.STRING,
       allowNull: true
-    }
+    },
+    userId: {
+      type: Sequelize.INTEGER,
+    },
   },
   { sequelize, modelName: "course" }
 );
