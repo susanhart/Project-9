@@ -110,11 +110,23 @@ app.get("/api/users", (req, res) => {
 //GET /api/courses 200 - Returns a list of courses (including the user that owns each course)
 
 app.get("/api/courses", async (req, res) => {
+    console.log("we got all courses")
     const courses = await Course.findAll();
       res.status(200).json({
         courses
       }); 
     }); 
+   
+    //GET /api/courses/:id 200 - Returns a the course (including the user that owns the course) for the provided course ID
+
+    app.get("/api/course/:id", async (req, res) => {
+      const id = req.params.id
+      const courses = await Course.findOne(id);
+        res.status(200).json({
+          courses
+        }); 
+      }); 
+
     
 //Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
