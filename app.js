@@ -117,17 +117,33 @@ app.get("/api/courses", async (req, res) => {
       }); 
     }); 
    
+    // ADD OWNER OF THE COURSE
     //GET /api/courses/:id 200 - Returns a the course (including the user that owns the course) for the provided course ID
 
     app.get("/api/course/:id", async (req, res) => {
       const id = req.params.id
-      const courses = await Course.findOne(id);
+      const courses = await Course.findByPk(id);
         res.status(200).json({
           courses
         }); 
       }); 
+      
+    //POST /api/courses 201 - Creates a course, sets the Location header to the URI for the course, and returns no content 
 
-    
+app.post("/api/courses", async (req, res) => {
+  const course = req.body
+  console.log(course)
+try{
+  const id = await Course.create(course)
+  console.log(id)
+  res.status(201).end()
+}catch(err){
+  console.log(err)
+}
+})
+
+
+
 //Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post("/api/users", async (req, res) => {
