@@ -16,6 +16,17 @@ const sequelize = new Sequelize({
   storage: "./fsjstd-restapi.db"
 });
 
+//Allows SERVER to understand the body you are sending
+
+const bodyParser = require("body-parser");
+app.use(bodyParser.json());
+app.use(
+  bodyParser.urlencoded({
+    extended: true
+  })
+);
+app.use(express.json());
+
 //Define Your Sequelize Models
 
 class User extends Sequelize.Model {} //created book class
@@ -42,10 +53,20 @@ User.init(
 //define a HasMany association between your User and Course models
 //(i.e. a "User" has many "Courses").
 
-User.associate = models => {
-  User.hasMany(models.Course, { foreignKey: "userId", allowNull: false });
-  // TODO Add associations.
+// User.associate = models => {
+//   User.hasMany(models.Course, { foreignKey: "userId", allowNull: false });
+//   // TODO Add associations.
+// };
+
+User.associate = function(models) {
+  User.hasMany(models.Course, {
+ foreignKey: {
+   fieldName: 'userId',
+   allowNull: false,
+ },
+});
 };
+
 
 class Course extends Sequelize.Model {} //created Course class
 Course.init(
@@ -78,8 +99,17 @@ Course.init(
 // Within your Course model, define a BelongsTo association
 //between your Course and User models (i.e. a "Course" belongs to a single "User").
 
-Course.associate = models => {
-  Course.belongsTo(models.User, { foreignKey: "userId", allowNull: false });
+// Course.associate = models => {
+//   Course.belongsTo(models.User, { foreignKey: "userId", allowNull: false });
+// };
+
+Course.associate = function(models) {
+  Course.belongsTo(models.User, {
+  foreignKey: {
+   fieldName: 'userId',
+   allowNull: false,
+  },
+ });
 };
 
 sequelize.authenticate().then(function(err) {
