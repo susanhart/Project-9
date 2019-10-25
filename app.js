@@ -175,7 +175,17 @@ try{
 }
 })
 
-
+app.put("api/course/:id", async (req, res) => {
+  //const updateCourse = req.body
+  //console.log('course')
+  // try{
+  const course = await Course.findByPk(req.params.id); 
+  await course.update(req.body);  
+  //records.updateCourse()
+  res.status(204).end()
+  // } catch(err) {
+  // }
+})
 
 //Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
