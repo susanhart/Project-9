@@ -2,7 +2,7 @@
 
 // load modules
 const express = require("express");
-const morgan = require("morgan");
+const morgan = require("morgan"); //request logger that prints stuff out about your server request for you
 const Sequelize = require("sequelize"); //importing sequelize
 
 // variable to enable global error logging
@@ -76,23 +76,22 @@ Course.init(
       type: Sequelize.INTEGER,
       primaryKey: true //properties of the user
     },
-
     title: {
       type: Sequelize.STRING //properties of the course
     },
     description: {
       type: Sequelize.TEXT
     },
+    userId: {
+      type: Sequelize.INTEGER,
+    },
     estimatedTime: {
-      type: Sequelize.STRING, //key, value
+      type: Sequelize.STRING,
       allowNull: true
     },
     materialsNeeded: {
       type: Sequelize.STRING,
       allowNull: true
-    },
-    userId: {
-      type: Sequelize.INTEGER,
     },
   },
   { sequelize, modelName: "course" }
@@ -165,26 +164,42 @@ app.get("/api/courses", async (req, res) => {
 
 app.post("/api/courses", async (req, res) => {
   const course = req.body
-  console.log(course)
+  console.log('debugging, here is the course: ',course)
 try{
   const id = await Course.create(course)
   console.log(id)
   res.status(201).end()
 }catch(err){
   console.log(err)
+  res.status(400).end()
 }
 })
 
-app.put("api/course/:id", async (req, res) => {
+app.put("/api/course/:id", async (req, res) => {
   //const updateCourse = req.body
   //console.log('course')
-  // try{
+  try{
+
+    console.log('id from put', req.params.id)
   const course = await Course.findByPk(req.params.id); 
+  console.log('looked up course in PUT: ',course)
   await course.update(req.body);  
   //records.updateCourse()
   res.status(204).end()
-  // } catch(err) {
-  // }
+
+  } catch(err) {
+    res.status(400).send({
+      error: err
+    })
+    // if (err.message.includes('FOREIGN KEY constraint')) {
+    //   res.status(400).send({
+    //     error: err
+    //   })
+    //   // add to response body an error message "User not found"
+    // }
+    // console.log(err)
+    // res.status(400).end()
+  }
 })
 
 //Create the user routes
