@@ -114,6 +114,10 @@ Course.associate = function(models) {
  });
 };
 
+Course.deleteCourse = async function(courseId) {
+return Course.destroy({where:{id:courseId}})
+}
+
 sequelize.authenticate().then(function(err) {
   console.log("Connection successful");
 });
@@ -175,32 +179,44 @@ try{
 }
 })
 
+//PUT /api/courses/:id 204 - Updates a course and returns no content
+
 app.put("/api/course/:id", async (req, res) => {
-  //const updateCourse = req.body
-  //console.log('course')
+ 
   try{
 
     console.log('id from put', req.params.id)
   const course = await Course.findByPk(req.params.id); 
   console.log('looked up course in PUT: ',course)
   await course.update(req.body);  
-  //records.updateCourse()
+  
   res.status(204).end()
 
   } catch(err) {
     res.status(400).send({
       error: err
     })
-    // if (err.message.includes('FOREIGN KEY constraint')) {
-    //   res.status(400).send({
-    //     error: err
-    //   })
-    //   // add to response body an error message "User not found"
-    // }
-    // console.log(err)
-    // res.status(400).end()
   }
 })
+
+//Create the course route
+//DELETE /api/courses/:id 204 - Deletes a course and returns no content
+
+app.delete("/api/course/:id", async (req, res) => {
+  try{
+    const course = await Course.findByPk(req.params.id);  
+    const ret = await Course.deleteCourse(course.id); 
+    console.log(ret) 
+    res.status(204).end();
+  } catch(err) {
+    console.log(err)
+    res.status(400).send({
+      error: err
+    })
+  }
+})
+
+
 
 //Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
