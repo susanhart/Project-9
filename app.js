@@ -174,6 +174,7 @@ app.get("/", (req, res) => {
 //Create the user routes
 //GET /api/users 200 - Returns the currently authenticated user
 app.get("/api/users", (req, res) => {
+  const validated = await user.validate(); 
   res.status(200).json({
     message: "User authenticated"
   });
