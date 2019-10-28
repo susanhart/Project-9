@@ -55,22 +55,25 @@ User.init(
         }
       }
     },
-    emailAddress: Sequelize.STRING, //key, value
+    emailAddress: {
+      type: Sequelize.STRING, //key, value
     allowNull: false,
       validate: {
         notNull: {
           msg: 'Please enter your email address'
         }
-      },
-
-    password: Sequelize.STRING,
+      }
+    },
+    password: {
+      type: Sequelize.STRING,
     allowNull: false,
       validate: {
         notNull: {
           msg: 'Please enter your password'
         }
       }
-  },
+  }
+},
   { sequelize, modelName: "user" }
 );
 
@@ -83,14 +86,14 @@ User.init(
 //   // TODO Add associations.
 // };
 
-User.associate = function(models) {
-  User.hasMany(models.Course, {
- foreignKey: {
-   fieldName: 'userId',
-   allowNull: false,
- },
-});
-};
+// User.associate = function(models) {
+//   User.hasMany(models.Course, {
+//  foreignKey: {
+//    fieldName: 'userId',
+//    allowNull: false,
+//  },
+// });
+// };
 
 
 class Course extends Sequelize.Model {} //created Course class
@@ -121,6 +124,8 @@ Course.init(
     },
     userId: {
       type: Sequelize.INTEGER,
+      references: "user",
+      referencesKey: "id",
     },
     estimatedTime: {
       type: Sequelize.STRING,
@@ -142,14 +147,17 @@ Course.init(
 //   Course.belongsTo(models.User, { foreignKey: "userId", allowNull: false });
 // };
 
-Course.associate = function(models) {
-  Course.belongsTo(models.User, {
-  foreignKey: {
-   fieldName: 'userId',
-   allowNull: false,
-  },
- });
-};
+// Course.associate = function(models) {
+//   Course.belongsTo(models.User, {
+//   foreignKey: {
+//    fieldName: 'userId',
+//    allowNull: false,
+//   },
+//  });
+// };
+Course.belongsTo(User);
+User.hasMany(Course);
+
 
 Course.deleteCourse = async function(courseId) {
 return Course.destroy({where:{id:courseId}})
@@ -174,7 +182,6 @@ app.get("/", (req, res) => {
 //Create the user routes
 //GET /api/users 200 - Returns the currently authenticated user
 app.get("/api/users", (req, res) => {
-  const validated = await user.validate(); 
   res.status(200).json({
     message: "User authenticated"
   });
@@ -204,22 +211,23 @@ app.get("/api/courses", async (req, res) => {
       
     //POST /api/courses 201 - Creates a course, sets the Location header to the URI for the course, and returns no content 
 
-app.post("/api/courses", async (req, res) => {
+app.post("/api/courses", async (req, res, next) => {
   const course = req.body
   console.log('debugging, here is the course: ',course)
-try{
-  const id = await Course.create(course)
-  console.log(id)
-  res.status(201).end()
-}catch(err){
-  console.log(err)
-  res.status(400).end()
-}
+  try{
+    const id = await Course.create(course)
+    console.log(id)
+    res.status(201).end()
+  }catch(err){
+    console.log(err)
+    //res.status(400).end()
+    next(err)
+  }
 })
 
 //PUT /api/courses/:id 204 - Updates a course and returns no content
 
-app.put("/api/course/:id", async (req, res) => {
+app.put("/api/course/:id", async (req, res, next) => {
  
   try{
 
@@ -231,9 +239,10 @@ app.put("/api/course/:id", async (req, res) => {
   res.status(204).end()
 
   } catch(err) {
-    res.status(400).send({
-      error: err
-    })
+    //res.status(400).send({
+      next(err);
+     // error: err
+   // })
   }
 })
 
@@ -258,14 +267,16 @@ app.delete("/api/course/:id", async (req, res) => {
 
 //Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
-app.post("/api/users", async (req, res) => {
+app.post("/api/users", async (req, res, next) => {
   try {
-    await User.create(req.body);
-    res.location('/');
+    console.log(req.body)
+    const user = await User.create(req.body);
+    const validated = await user.validate(); 
+   // res.location('/');
     res.status(201).end();
-  
 } catch(err){ 
 console.log(err)
+next(err)
 }
 
 });
