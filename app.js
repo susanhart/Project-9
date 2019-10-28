@@ -38,13 +38,38 @@ User.init(
       primaryKey: true //properties of the user
     },
     firstName: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'Please enter your first name'
+        }
+      }
     },
     lastName: {
-      type: Sequelize.STRING
+      type: Sequelize.STRING,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'Please enter your last name'
+        }
+      }
     },
     emailAddress: Sequelize.STRING, //key, value
-    password: Sequelize.STRING
+    allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'Please enter your email address'
+        }
+      },
+
+    password: Sequelize.STRING,
+    allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'Please enter your password'
+        }
+      }
   },
   { sequelize, modelName: "user" }
 );
@@ -77,10 +102,22 @@ Course.init(
       primaryKey: true //properties of the user
     },
     title: {
-      type: Sequelize.STRING //properties of the course
+      type: Sequelize.STRING, //properties of the course
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'Please enter the course title'
+        }
+      }
     },
     description: {
-      type: Sequelize.TEXT
+      type: Sequelize.TEXT,
+      allowNull: false,
+      validate: {
+        notNull: {
+          msg: 'Please enter the course description'
+        }
+      }
     },
     userId: {
       type: Sequelize.INTEGER,
