@@ -44,8 +44,6 @@ const authenticateUser = (req, res, next) => {
     }
   };
 
-
-
 //   // Hash the new user's password.
 //   user.password = bcryptjs.hashSync(user.password);
 
