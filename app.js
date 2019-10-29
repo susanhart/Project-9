@@ -5,57 +5,46 @@ const express = require("express");
 const morgan = require("morgan"); //request logger that prints stuff out about your server request for you
 const Sequelize = require("sequelize"); //importing sequelize
 
-// / This array is used to keep track of user records
-// // as they are created.
-// const users = [];
+const bcryptjs = require('bcryptjs');
+const auth = require('basic-auth');
 
-// /**
-//  * Middleware to authenticate the request using Basic Authentication.
-//  * @param {Request} req - The Express Request object.
-//  * @param {Response} res - The Express Response object.
-//  * @param {Function} next - The function to call to pass execution to the next middleware.
-//  */
+const authenticateUser = (req, res, next) => {
+    let message = null;
+  
+    // Get the user's credentials from the Authorization header.
+    const credentials = auth(req);
+  
+    if (credentials) {
+      // Look for a user whose `username` matches the credentials `name` property.
+      const user = User.find(u => u.emailAddress === credentials.name);
+  
+      if (user) {
+        const authenticated = bcryptjs
+          .compareSync(credentials.pass, user.password);
+        if (authenticated) {
+          console.log(`Authentication successful for username: ${user.emailAddress}`);
+  
+          // Store the user on the Request object.
+          req.currentUser = user;
+        } else {
+          message = `Authentication failure for username: ${user.emailAddress}`;
+        }
+      } else {
+        message = `User not found for username: ${credentials.name}`;
+      }
+    } else {
+      message = 'Auth header not found';
+    }
+  
+    if (message) {
+      console.warn(message);
+      res.status(401).json({ message: 'Access Denied' });
+    } else {
+      next();
+    }
+  };
 
 
-// // Construct a router instance.
-// const router = express.Router();
-
-// // Route that returns the current authenticated user.
-// router.get('/users', authenticateUser, (req, res) => {
-//   const user = req.currentUser;
-
-//   res.json({
-//     name: user.name,
-//     username: user.username,
-//   });
-// });
-
-// // Route that creates a new user.
-// router.post('/users', [
-//   check('name')
-//     .exists({ checkNull: true, checkFalsy: true })
-//     .withMessage('Please provide a value for "name"'),
-//   check('username')
-//     .exists({ checkNull: true, checkFalsy: true })
-//     .withMessage('Please provide a value for "username"'),
-//   check('password')
-//     .exists({ checkNull: true, checkFalsy: true })
-//     .withMessage('Please provide a value for "password"'),
-// ], (req, res) => {
-//   // Attempt to get the validation result from the Request object.
-//   const errors = validationResult(req);
-
-//   // If there are validation errors...
-//   if (!errors.isEmpty()) {
-//     // Use the Array `map()` method to get a list of error messages.
-//     const errorMessages = errors.array().map(error => error.msg);
-
-//     // Return the validation errors to the client.
-//     return res.status(400).json({ errors: errorMessages });
-//   }
-
-//   // Get the user from the request body.
-//   const user = req.body;
 
 //   // Hash the new user's password.
 //   user.password = bcryptjs.hashSync(user.password);
@@ -66,8 +55,6 @@ const Sequelize = require("sequelize"); //importing sequelize
 //   // Set the status to 201 Created and end the response.
 //   return res.status(201).end();
 // });
-
-// module.exports = router;
 
 // variable to enable global error logging
 const enableGlobalErrorLogging =
@@ -245,7 +232,7 @@ app.get("/", (req, res) => {
 
 //Create the user routes
 //GET /api/users 200 - Returns the currently authenticated user
-app.get("/api/users", (req, res) => {
+app.get("/api/users", authenticateUser,(req, res) => {
   res.status(200).json({
     message: "User authenticated"
   });
@@ -275,7 +262,7 @@ app.get("/api/courses", async (req, res) => {
       
     //POST /api/courses 201 - Creates a course, sets the Location header to the URI for the course, and returns no content 
 
-app.post("/api/courses", async (req, res, next) => {
+app.post("/api/courses", authenticateUser, async (req, res, next) => {
   const course = req.body
   console.log('debugging, here is the course: ',course)
   try{
@@ -291,7 +278,7 @@ app.post("/api/courses", async (req, res, next) => {
 
 //PUT /api/courses/:id 204 - Updates a course and returns no content
 
-app.put("/api/course/:id", async (req, res, next) => {
+app.put("/api/course/:id", authenticateUser, async (req, res, next) => {
  
   try{
 
@@ -313,7 +300,7 @@ app.put("/api/course/:id", async (req, res, next) => {
 //Create the course route
 //DELETE /api/courses/:id 204 - Deletes a course and returns no content
 
-app.delete("/api/course/:id", async (req, res) => {
+app.delete("/api/course/:id", authenticateUser, async (req, res) => {
   try{
     const course = await Course.findByPk(req.params.id);  
     const ret = await Course.deleteCourse(course.id); 
@@ -327,34 +314,21 @@ app.delete("/api/course/:id", async (req, res) => {
   }
 })
 
-
-
 //Create the user routes
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post("/api/users", async (req, res, next) => {
   try {
-//     var bcrypt = require('bcryptjs');
-// bcrypt.genSalt(10, function(err, salt) {
-//     bcrypt.hash("B4c0/\/", salt, function(err, hash) {
-//         // Store hash in your password DB.
-//     });
-// });
-// // Load hash from your password DB.
-// bcrypt.compare("B4c0/\/", hash, function(err, res) {
-//   // res === true
-// });
-// bcrypt.compare("not_bacon", hash, function(err, res) {
-//   // res === false
-// });
-
-// // As of bcryptjs 2.4.0, compare returns a promise if callback is omitted:
-// bcrypt.compare("B4c0/\/", hash).then((res) => {
-//   // res === true
-// });
-// bcrypt.hash('bacon', 8, function(err, hash) {
-// });
+       // Get the user from the request body.
+    const user = req.body;
+    // Hash the new user's password.
+    user.password = bcryptjs.hashSync(user.password);
     console.log(req.body)
-    const user = await User.create(req.body);
+    await User.create({
+      firstName:user.firstName,
+      lastName:user.lastName,
+      emailAddress:user.emailAddress,
+      password:user.password
+    });
     const validated = await user.validate(); 
    // res.location('/');
     res.status(201).end();
