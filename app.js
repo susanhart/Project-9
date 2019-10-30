@@ -68,7 +68,7 @@ app.use(express.json());
 
 //Define Your Sequelize Models
 
-class User extends Sequelize.Model {} //created book class
+class User extends Sequelize.Model {} //creates a User class
 User.init(
   {
     //initializes the model object
@@ -116,26 +116,7 @@ User.init(
   { sequelize, modelName: "user" }
 );
 
-//Define associations between your models Within your User model,
-//define a HasMany association between your User and Course models
-//(i.e. a "User" has many "Courses").
-
-// User.associate = models => {
-//   User.hasMany(models.Course, { foreignKey: "userId", allowNull: false });
-//   // TODO Add associations.
-// };
-
-// User.associate = function(models) {
-//   User.hasMany(models.Course, {
-//  foreignKey: {
-//    fieldName: 'userId',
-//    allowNull: false,
-//  },
-// });
-// };
-
-
-class Course extends Sequelize.Model {} //created Course class
+class Course extends Sequelize.Model {} //creates a Course class
 Course.init(
   {
     //initializes the model object
@@ -181,19 +162,10 @@ Course.init(
 //Define associations between your models 
 // Within your Course model, define a BelongsTo association
 //between your Course and User models (i.e. a "Course" belongs to a single "User").
+//Define associations between your models Within your User model,
+//define a HasMany association between your User and Course models
+//(i.e. a "User" has many "Courses").
 
-// Course.associate = models => {
-//   Course.belongsTo(models.User, { foreignKey: "userId", allowNull: false });
-// };
-
-// Course.associate = function(models) {
-//   Course.belongsTo(models.User, {
-//   foreignKey: {
-//    fieldName: 'userId',
-//    allowNull: false,
-//   },
-//  });
-// };
 Course.belongsTo(User);
 User.hasMany(Course);
 
