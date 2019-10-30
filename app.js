@@ -10,40 +10,45 @@ const auth = require('basic-auth');
 
 const authenticateUser = (req, res, next) => {
     let message = null;
-  
+
     // Get the user's credentials from the Authorization header.
     const credentials = auth(req);
-  
+
     if (credentials) {
       // Look for a user whose `username` matches the credentials `name` property.
       const user = User.findOne({
-        where : {emailAddress : credentials.name
+        where : {
+          emailAddress : credentials.name
         }
       }).then(user => {
-        if(user) {
-        const authenticated = bcryptjs
+        if (user) {
+          const authenticated = bcryptjs
           .compareSync(credentials.pass, user.password);
-        if (authenticated) {
-          console.log(`Authentication successful for user with emailAddress}`);
-  
-          // Store the user on the Request object.
-          req.currentUser = user;
+
+          if (authenticated) {
+            console.log(`Authentication successful for user with email Address: ${user.emailAddress}`);
+
+            if (req.originalUrl.includes('users')) {
+            req.body.id = user.id;
+          } else if (req.originalUrl.includes('courses')) {
+            req.body.userId = user.id;
+          }
+          next();
         } else {
-          message = `Authentication failure for username: ${user.emailAddress}`;
+          console.log(`Authentication failure for user: ${user.emailAddress}`);
+          res.status(401).json({ message: 'Access Denied' });
         }
       } else {
-        message = `User not found for username: ${credentials.name}`;
+        console.log( `User not found: ${credentials.name}`);
+        res.status(401).json({ message: 'Access Denied' });
       }
+      })
     } else {
-      message = 'Auth header not found';
-    }
-  
-    if (message) {
-      console.warn(message);
-      res.status(401).json({ message: 'Access Denied' });
-    } else {
-      next();
-    }
+    //If the header is missing, return a response with a 401
+    //Unauthorized HTTP status code.
+    console.log('Auth header not found');
+    res.status(401).json({ message: 'Access Denied' });
+  }
   };
 
 // variable to enable global error logging
@@ -161,7 +166,7 @@ Course.init(
   { sequelize, modelName: "course" }
 );
 
-//Define associations between your models 
+//Define associations between your models
 // Within your Course model, define a BelongsTo association
 //between your Course and User models (i.e. a "Course" belongs to a single "User").
 //Define associations between your models Within your User model,
@@ -208,21 +213,23 @@ app.get("/api/courses", async (req, res) => {
     const courses = await Course.findAll();
       res.status(200).json({
         courses
-      }); 
-    }); 
-   
+      });
+});
+
     // ADD OWNER OF THE COURSE
     //GET /api/courses/:id 200 - Returns a the course (including the user that owns the course) for the provided course ID
 
-    app.get("/api/course/:id", async (req, res) => {
-      const id = req.params.id
-      const courses = await Course.findByPk(id);
-        res.status(200).json({
-          courses
-        }); 
-      }); 
-      
-    //POST /api/courses 201 - Creates a course, sets the Location header to the URI for the course, and returns no content 
+app.get("/api/courses/:id", async (req, res) => {
+  const course = await Course.findByPk(req.params.id);
+
+  if (course === null) {
+    res.status(404).json({message: "This course does not exist"});
+  } else {
+    res.status(200).json(course);
+  }
+});
+
+    //POST /api/courses 201 - Creates a course, sets the Location header to the URI for the course, and returns no content
 
 app.post("/api/courses", authenticateUser, async (req, res, next) => {
   const course = req.body
@@ -240,15 +247,22 @@ app.post("/api/courses", authenticateUser, async (req, res, next) => {
 
 //PUT /api/courses/:id 204 - Updates a course and returns no content
 
-app.put("/api/course/:id", authenticateUser, async (req, res, next) => {
- 
+app.put("/api/courses/:id", authenticateUser, async (req, res, next) => {
+
   try{
+    //Need to explicitly check with a conditional statement that req.body.title &&
+    //req.body.description exist, and only then can the course be updated.
+    /* if (req.body.title && req.body.description) {
+    Happy path--update course
+  } else {
+  send 400 status (Bad request -- Please include title and description)
+}*/
 
     console.log('id from put', req.params.id)
-  const course = await Course.findByPk(req.params.id); 
+  const course = await Course.findByPk(req.params.id);
   console.log('looked up course in PUT: ',course)
-  await course.update(req.body);  
-  
+  await course.update(req.body);
+
   res.status(204).end()
 
   } catch(err) {
@@ -262,11 +276,10 @@ app.put("/api/course/:id", authenticateUser, async (req, res, next) => {
 //Create the course route
 //DELETE /api/courses/:id 204 - Deletes a course and returns no content
 
-app.delete("/api/course/:id", authenticateUser, async (req, res) => {
+app.delete("/api/courses/:id", authenticateUser, async (req, res) => {
   try{
-    const course = await Course.findByPk(req.params.id);  
-    const ret = await Course.deleteCourse(course.id); 
-    console.log(ret) 
+    const course = await Course.findByPk(req.params.id);
+    course.destroy(); 
     res.status(204).end();
   } catch(err) {
     console.log(err)
@@ -281,20 +294,11 @@ app.delete("/api/course/:id", authenticateUser, async (req, res) => {
 app.post("/api/users", async (req, res, next) => {
   try {
        // Get the user from the request body.
-    const user = req.body;
-    // Hash the new user's password.
-    user.password = bcryptjs.hashSync(user.password);
-    console.log(password)
-    await User.create({
-      firstName:user.firstName,
-      lastName:user.lastName,
-      emailAddress:user.emailAddress,
-      password:user.password
-    });
-    const validated = await user.validate(); 
-   // res.location('/');
+    req.body.password = bcryptjs.hashSync(req.body.password);
+    await User.create(req.body);
+    res.location('/');
     res.status(201).end();
-} catch(err){ 
+} catch(err){
 console.log(err)
 next(err)
 }
