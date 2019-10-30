@@ -199,9 +199,10 @@ app.get("/", (req, res) => {
 
 //Create the user routes
 //GET /api/users 200 - Returns the currently authenticated user
-app.get("/api/users", authenticateUser,(req, res) => {
+app.get("/api/users", authenticateUser, async (req, res) => {
+  const user = await User.findByPk(req.body.id);
   res.status(200).json({
-    message: "User authenticated"
+    user
   });
 });
 
@@ -258,22 +259,23 @@ app.put("/api/courses/:id", authenticateUser, async (req, res, next) => {
   send 400 status (Bad request -- Please include title and description)
 }*/
   const course = await Course.findByPk(req.params.id);
-  if (req.body.userId === course.userId) {
-  if (req.body.title && req.body.description) { 
-    if (course === null) {
-      res.status(404).json({ message: "The course you have selected does not exist" });
-    } else {   
-  await course.update(req.body);
-
-  res.status(204).end()
-
+   if (req.body.title && req.body.description) {
+     if (course === null) {
+       res.status(404).json({ message: 'This course does not exist'})
+     } else {
+       await course.update(req.body);
+       res.status(204).end(); 
+     }
+   } else if (!req.body.title || !req.body.description) {
+     res.status(400).json({ message: 'Please include a title and description!'})
+   }
   } catch(err) {
     //res.status(400).send({
       next(err);
      // error: err
    // })
   }
-})
+});
 
 //Create the course route
 //DELETE /api/courses/:id 204 - Deletes a course and returns no content
