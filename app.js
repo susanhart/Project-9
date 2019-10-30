@@ -257,10 +257,12 @@ app.put("/api/courses/:id", authenticateUser, async (req, res, next) => {
   } else {
   send 400 status (Bad request -- Please include title and description)
 }*/
-
-    console.log('id from put', req.params.id)
   const course = await Course.findByPk(req.params.id);
-  console.log('looked up course in PUT: ',course)
+  if (req.body.userId === course.userId) {
+  if (req.body.title && req.body.description) { 
+    if (course === null) {
+      res.status(404).json({ message: "The course you have selected does not exist" });
+    } else {   
   await course.update(req.body);
 
   res.status(204).end()
