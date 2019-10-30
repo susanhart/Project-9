@@ -44,16 +44,6 @@ const authenticateUser = (req, res, next) => {
     }
   };
 
-//   // Hash the new user's password.
-//   user.password = bcryptjs.hashSync(user.password);
-
-//   // Add the user to the `users` array.
-//   users.push(user);
-
-//   // Set the status to 201 Created and end the response.
-//   return res.status(201).end();
-// });
-
 // variable to enable global error logging
 const enableGlobalErrorLogging =
   process.env.ENABLE_GLOBAL_ERROR_LOGGING === "true";
