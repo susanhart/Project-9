@@ -16,13 +16,15 @@ const authenticateUser = (req, res, next) => {
   
     if (credentials) {
       // Look for a user whose `username` matches the credentials `name` property.
-      const user = User.find(u => u.emailAddress === credentials.name);
-  
-      if (user) {
+      const user = User.findOne({
+        where : {emailAddress : credentials.name
+        }
+      }).then(user => {
+        if(user) {
         const authenticated = bcryptjs
           .compareSync(credentials.pass, user.password);
         if (authenticated) {
-          console.log(`Authentication successful for username: ${user.emailAddress}`);
+          console.log(`Authentication successful for user with emailAddress}`);
   
           // Store the user on the Request object.
           req.currentUser = user;
