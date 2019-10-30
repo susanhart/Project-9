@@ -282,7 +282,7 @@ app.post("/api/users", async (req, res, next) => {
     const user = req.body;
     // Hash the new user's password.
     user.password = bcryptjs.hashSync(user.password);
-    console.log(req.body)
+    console.log(password)
     await User.create({
       firstName:user.firstName,
       lastName:user.lastName,
