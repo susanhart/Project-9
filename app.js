@@ -81,37 +81,37 @@ User.init(
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'Please enter your first name'
-        }
-      }
+          msg: 'Please enter your first name',
+        },
+      },
     },
     lastName: {
       type: Sequelize.STRING,
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'Please enter your last name'
-        }
-      }
+          msg: 'Please enter your last name',
+        },
+      },
     },
     emailAddress: {
       type: Sequelize.STRING, //key, value
     allowNull: false,
       validate: {
         notNull: {
-          msg: 'Please enter your email address'
-        }
-      }
+          msg: 'Please enter your email address',
+        },
+      },
     },
     password: {
       type: Sequelize.STRING,
     allowNull: false,
       validate: {
         notNull: {
-          msg: 'Please enter your password'
-        }
-      }
-  }
+          msg: 'Please enter your password',
+        },
+      },
+  },
 },
   { sequelize, modelName: "user" }
 );
@@ -129,18 +129,18 @@ Course.init(
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'Please enter the course title'
-        }
-      }
+          msg: 'Please enter the course title',
+        },
+      },
     },
     description: {
       type: Sequelize.TEXT,
       allowNull: false,
       validate: {
         notNull: {
-          msg: 'Please enter the course description'
-        }
-      }
+          msg: 'Please enter the course description',
+        },
+      },
     },
     userId: {
       type: Sequelize.INTEGER,
@@ -149,11 +149,11 @@ Course.init(
     },
     estimatedTime: {
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: true,
     },
     materialsNeeded: {
       type: Sequelize.STRING,
-      allowNull: true
+      allowNull: true,
     },
   },
   { sequelize, modelName: "course" }
