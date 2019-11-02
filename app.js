@@ -303,10 +303,16 @@ app.post("/api/users", async (req, res, next) => {
     res.location('/');
     res.status(201).end();
 } catch(err){
-console.log(err)
-next(err)
+  //If there is a Sequelize Validation Error (a required field such as the password is missing) or
+    //if the user's email is not unique, send them a 400 status code with a
+    //Sequelize error message.
+  if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
+    res.status(400).json({error: err.message})
+  } else {
+    //For any other error, send it on to the global error handler.
+    return next(err);
+  }
 }
-
 });
 
 // send 404 if no other route matched
