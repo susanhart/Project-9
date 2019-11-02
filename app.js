@@ -297,21 +297,23 @@ app.delete("/api/courses/:id", authenticateUser, async (req, res) => {
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post("/api/users", async (req, res, next) => {
   try {
-       // Get the user from the request body.
-    req.body.password = bcryptjs.hashSync(req.body.password);
+  const firstName = req.body.firstName
+  const lastName = req.body.lastName
+  const emailAddress = req.body.emailAddress
+  const password = req.body.password 
+
+   // Get the user from the request body. 
+    if (firstName && lastName && emailAddress && password) {
+      password = bcryptjs.hashSync(password);
     await User.create(req.body);
     res.location('/');
     res.status(201).end();
+    } else {
+      res.status(400).json({error:"Please provide the missing information"})
+    }
+       
 } catch(err){
-  //If there is a Sequelize Validation Error (a required field such as the password is missing) or
-    //if the user's email is not unique, send them a 400 status code with a
-    //Sequelize error message.
-  if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
-    res.status(400).json({error: err.message})
-  } else {
-    //For any other error, send it on to the global error handler.
-    return next(err);
-  }
+  next(err);
 }
 });
 
