@@ -243,9 +243,12 @@ app.post("/api/courses", authenticateUser, async (req, res, next) => {
     console.log(courseWithId)
     res.status(201).end()
   }catch(err){
-    console.log(err)
-    res.status(400).end()
-    next(err)
+    if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
+  res.status(400).json({error: err.message})
+} else {
+  return next(err);
+}
+
   }
 })
 
@@ -323,13 +326,6 @@ app.post("/api/users", async (req, res, next) => {
 }
 }
 })
-
-// if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
-//   res.status(400).json({error: err.message})
-// } else {
-//   return next(err);
-// }
-// }
 
 // send 404 if no other route matched
 app.use((req, res) => {
