@@ -214,7 +214,12 @@ app.get("/api/users", authenticateUser, async (req, res) => {
 
 app.get("/api/courses", async (req, res) => {
     console.log("we got all courses")
-    const courses = await Course.findAll();
+    const courses = await Course.findAll({include:[{
+      model:User,
+      as: "user",
+      attributes: ['id','firstName','lastName']
+    }]
+  });
       res.status(200).json({
         courses
       });
@@ -224,7 +229,13 @@ app.get("/api/courses", async (req, res) => {
     //GET /api/courses/:id 200 - Returns a the course (including the user that owns the course) for the provided course ID
 
 app.get("/api/courses/:id", async (req, res) => {
-  const course = await Course.findByPk(req.params.id);
+  const course = await Course.findByPk(req.params.id, {
+    include:[{
+      model:User,
+      as: "user",
+      attributes: ['id','firstName','lastName']
+    }]
+  });
 
   if (course === null) {
     res.status(404).json({message: "This course does not exist"});
