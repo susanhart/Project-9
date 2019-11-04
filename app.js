@@ -297,10 +297,10 @@ app.delete("/api/courses/:id", authenticateUser, async (req, res) => {
 //POST /api/users 201 - Creates a user, sets the Location header to "/", and returns no content
 app.post("/api/users", async (req, res, next) => {
   try {
-  const firstName = req.body.firstName
-  const lastName = req.body.lastName
-  const emailAddress = req.body.emailAddress
-  const password = req.body.password 
+  let firstName = req.body.firstName
+  let lastName = req.body.lastName
+  let emailAddress = req.body.emailAddress
+  let password = req.body.password 
 
    // Get the user from the request body. 
     if (firstName && lastName && emailAddress && password) {
