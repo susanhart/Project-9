@@ -234,14 +234,13 @@ app.get("/api/courses/:id", async (req, res) => {
 
 app.post("/api/courses", authenticateUser, async (req, res, next) => {
   const course = req.body
-  console.log('debugging, here is the course: ',course)
   try{
     const id = await Course.create(course)
     console.log(id)
     res.status(201).end()
   }catch(err){
     console.log(err)
-    //res.status(400).end()
+    res.status(400).end()
     next(err)
   }
 })
