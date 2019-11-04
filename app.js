@@ -322,7 +322,13 @@ app.post("/api/users", async (req, res, next) => {
    // Get the user from the request body. 
     if (firstName && lastName && emailAddress && password) {
       password = bcryptjs.hashSync(password);
-    await User.create(req.body);
+      let updatedUser = {
+        "firstName": firstName,
+        "lastName": lastName,
+        "emailAddress": emailAddress,
+        "password": password
+      }
+    await User.create(updatedUser);
     res.location('/');
     res.status(201).end();
     } else {
