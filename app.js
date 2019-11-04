@@ -129,7 +129,10 @@ Course.init(
     //initializes the model object
     id: {
       type: Sequelize.INTEGER,
-      primaryKey: true //properties of the user
+      primaryKey: true, //properties of the user
+      allowNull: false,
+      autoIncrement: true,
+
     },
     title: {
       type: Sequelize.STRING, //properties of the course
@@ -235,8 +238,9 @@ app.get("/api/courses/:id", async (req, res) => {
 app.post("/api/courses", authenticateUser, async (req, res, next) => {
   const course = req.body
   try{
-    const id = await Course.create(course)
-    console.log(id)
+    const courseWithId = await Course.create(course)
+    res.location(`/api/courses/${courseWithId.id}`);
+    console.log(courseWithId)
     res.status(201).end()
   }catch(err){
     console.log(err)
@@ -315,6 +319,14 @@ app.post("/api/users", async (req, res, next) => {
   next(err);
 }
 });
+
+// if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
+//   res.status(400).json({error: err.message})
+// } else {
+//   //For any other error, I send it on to my global error handler.
+//   return next(err);
+// }
+// }
 
 // send 404 if no other route matched
 app.use((req, res) => {
