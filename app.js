@@ -316,14 +316,17 @@ app.post("/api/users", async (req, res, next) => {
     }
        
 } catch(err){
-  next(err);
+  if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
+  res.status(400).json({error: err.message})
+} else {
+  return next(err);
 }
-});
+}
+})
 
 // if (err.name === "SequelizeValidationError" || "SequelizeUniqueConstraintError") {
 //   res.status(400).json({error: err.message})
 // } else {
-//   //For any other error, I send it on to my global error handler.
 //   return next(err);
 // }
 // }
